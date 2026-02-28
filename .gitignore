@@ -4,3 +4,6 @@ __pycache__/
 data_raw/
 data_clean/
 *.crdownload
+.env
+*.docx
+~$*

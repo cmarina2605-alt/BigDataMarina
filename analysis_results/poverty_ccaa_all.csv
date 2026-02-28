@@ -1,0 +1,361 @@
+﻿territory,year,poverty_rate
+Andalucía,2008,27.3
+Andalucía,2009,28.8
+Andalucía,2010,28.3
+Andalucía,2011,30.7
+Andalucía,2012,28.3
+Andalucía,2013,29.1
+Andalucía,2014,33.3
+Andalucía,2015,35.7
+Andalucía,2016,35.4
+Andalucía,2017,31.0
+Andalucía,2018,32.0
+Andalucía,2019,31.3
+Andalucía,2020,28.5
+Andalucía,2021,32.3
+Andalucía,2022,29.1
+Andalucía,2023,30.5
+Andalucía,2024,29.2
+Andalucía,2025,27.7
+Aragón,2008,14.9
+Aragón,2009,11.3
+Aragón,2010,14.2
+Aragón,2011,15.5
+Aragón,2012,14.5
+Aragón,2013,16.1
+Aragón,2014,16.9
+Aragón,2015,14.4
+Aragón,2016,15.7
+Aragón,2017,13.3
+Aragón,2018,14.2
+Aragón,2019,17.9
+Aragón,2020,16.0
+Aragón,2021,15.8
+Aragón,2022,15.0
+Aragón,2023,15.1
+Aragón,2024,15.1
+Aragón,2025,13.6
+"Asturias, Principado de",2008,13.2
+"Asturias, Principado de",2009,13.0
+"Asturias, Principado de",2010,11.5
+"Asturias, Principado de",2011,14.1
+"Asturias, Principado de",2012,13.0
+"Asturias, Principado de",2013,14.1
+"Asturias, Principado de",2014,16.7
+"Asturias, Principado de",2015,16.7
+"Asturias, Principado de",2016,13.4
+"Asturias, Principado de",2017,12.6
+"Asturias, Principado de",2018,14.0
+"Asturias, Principado de",2019,20.7
+"Asturias, Principado de",2020,22.2
+"Asturias, Principado de",2021,20.4
+"Asturias, Principado de",2022,20.1
+"Asturias, Principado de",2023,18.6
+"Asturias, Principado de",2024,15.6
+"Asturias, Principado de",2025,17.2
+"Balears, Illes",2008,18.1
+"Balears, Illes",2009,18.1
+"Balears, Illes",2010,22.7
+"Balears, Illes",2011,21.0
+"Balears, Illes",2012,19.9
+"Balears, Illes",2013,19.8
+"Balears, Illes",2014,17.9
+"Balears, Illes",2015,21.7
+"Balears, Illes",2016,15.5
+"Balears, Illes",2017,21.3
+"Balears, Illes",2018,15.4
+"Balears, Illes",2019,12.0
+"Balears, Illes",2020,14.1
+"Balears, Illes",2021,17.6
+"Balears, Illes",2022,16.9
+"Balears, Illes",2023,15.3
+"Balears, Illes",2024,11.3
+"Balears, Illes",2025,11.6
+Canarias,2008,30.7
+Canarias,2009,30.4
+Canarias,2010,29.7
+Canarias,2011,30.1
+Canarias,2012,33.6
+Canarias,2013,28.4
+Canarias,2014,27.6
+Canarias,2015,28.5
+Canarias,2016,35.0
+Canarias,2017,30.5
+Canarias,2018,32.1
+Canarias,2019,28.5
+Canarias,2020,29.9
+Canarias,2021,28.4
+Canarias,2022,29.4
+Canarias,2023,26.1
+Canarias,2024,24.6
+Canarias,2025,22.9
+Cantabria,2008,14.3
+Cantabria,2009,13.9
+Cantabria,2010,20.1
+Cantabria,2011,16.7
+Cantabria,2012,17.7
+Cantabria,2013,17.8
+Cantabria,2014,20.6
+Cantabria,2015,14.9
+Cantabria,2016,15.3
+Cantabria,2017,17.6
+Cantabria,2018,19.9
+Cantabria,2019,17.3
+Cantabria,2020,18.0
+Cantabria,2021,15.4
+Cantabria,2022,14.8
+Cantabria,2023,15.2
+Cantabria,2024,17.3
+Cantabria,2025,13.9
+Castilla - La Mancha,2008,26.4
+Castilla - La Mancha,2009,24.8
+Castilla - La Mancha,2010,28.3
+Castilla - La Mancha,2011,29.4
+Castilla - La Mancha,2012,30.0
+Castilla - La Mancha,2013,31.3
+Castilla - La Mancha,2014,28.4
+Castilla - La Mancha,2015,28.5
+Castilla - La Mancha,2016,31.7
+Castilla - La Mancha,2017,28.1
+Castilla - La Mancha,2018,29.9
+Castilla - La Mancha,2019,26.2
+Castilla - La Mancha,2020,25.1
+Castilla - La Mancha,2021,27.4
+Castilla - La Mancha,2022,26.1
+Castilla - La Mancha,2023,25.5
+Castilla - La Mancha,2024,27.4
+Castilla - La Mancha,2025,25.9
+Castilla y León,2008,17.5
+Castilla y León,2009,18.8
+Castilla y León,2010,19.5
+Castilla y León,2011,17.6
+Castilla y León,2012,15.9
+Castilla y León,2013,17.5
+Castilla y León,2014,20.4
+Castilla y León,2015,18.3
+Castilla y León,2016,17.7
+Castilla y León,2017,15.4
+Castilla y León,2018,16.1
+Castilla y León,2019,12.9
+Castilla y León,2020,15.1
+Castilla y León,2021,17.9
+Castilla y León,2022,17.8
+Castilla y León,2023,18.2
+Castilla y León,2024,18.5
+Castilla y León,2025,19.8
+Cataluña,2008,12.3
+Cataluña,2009,15.2
+Cataluña,2010,14.7
+Cataluña,2011,14.2
+Cataluña,2012,15.8
+Cataluña,2013,13.9
+Cataluña,2014,15.8
+Cataluña,2015,13.9
+Cataluña,2016,13.2
+Cataluña,2017,15.0
+Cataluña,2018,13.6
+Cataluña,2019,13.9
+Cataluña,2020,16.7
+Cataluña,2021,14.8
+Cataluña,2022,14.5
+Cataluña,2023,13.9
+Cataluña,2024,12.9
+Cataluña,2025,14.3
+Ceuta,2008,40.1
+Ceuta,2009,36.4
+Ceuta,2010,31.3
+Ceuta,2011,26.3
+Ceuta,2012,32.2
+Ceuta,2013,40.8
+Ceuta,2014,44.3
+Ceuta,2015,31.0
+Ceuta,2016,36.0
+Ceuta,2017,32.5
+Ceuta,2018,38.3
+Ceuta,2019,40.6
+Ceuta,2020,35.3
+Ceuta,2021,32.3
+Ceuta,2022,34.8
+Ceuta,2023,35.9
+Ceuta,2024,34.6
+Ceuta,2025,37.0
+Comunitat Valenciana,2008,23.6
+Comunitat Valenciana,2009,20.9
+Comunitat Valenciana,2010,22.7
+Comunitat Valenciana,2011,22.0
+Comunitat Valenciana,2012,25.0
+Comunitat Valenciana,2013,23.6
+Comunitat Valenciana,2014,26.2
+Comunitat Valenciana,2015,25.3
+Comunitat Valenciana,2016,24.4
+Comunitat Valenciana,2017,25.6
+Comunitat Valenciana,2018,26.0
+Comunitat Valenciana,2019,23.7
+Comunitat Valenciana,2020,24.6
+Comunitat Valenciana,2021,25.1
+Comunitat Valenciana,2022,22.3
+Comunitat Valenciana,2023,24.3
+Comunitat Valenciana,2024,24.8
+Comunitat Valenciana,2025,26.0
+Extremadura,2008,35.3
+Extremadura,2009,30.9
+Extremadura,2010,35.7
+Extremadura,2011,31.7
+Extremadura,2012,29.4
+Extremadura,2013,30.9
+Extremadura,2014,33.1
+Extremadura,2015,29.0
+Extremadura,2016,30.4
+Extremadura,2017,38.8
+Extremadura,2018,37.6
+Extremadura,2019,31.5
+Extremadura,2020,31.4
+Extremadura,2021,32.3
+Extremadura,2022,30.0
+Extremadura,2023,27.6
+Extremadura,2024,27.5
+Extremadura,2025,26.2
+Galicia,2008,20.9
+Galicia,2009,20.6
+Galicia,2010,18.1
+Galicia,2011,16.1
+Galicia,2012,18.3
+Galicia,2013,17.2
+Galicia,2014,15.4
+Galicia,2015,19.4
+Galicia,2016,19.0
+Galicia,2017,18.7
+Galicia,2018,18.8
+Galicia,2019,20.0
+Galicia,2020,22.1
+Galicia,2021,20.2
+Galicia,2022,18.0
+Galicia,2023,19.4
+Galicia,2024,14.2
+Galicia,2025,16.0
+"Madrid, Comunidad de",2008,14.9
+"Madrid, Comunidad de",2009,15.9
+"Madrid, Comunidad de",2010,14.4
+"Madrid, Comunidad de",2011,14.0
+"Madrid, Comunidad de",2012,14.2
+"Madrid, Comunidad de",2013,13.4
+"Madrid, Comunidad de",2014,14.7
+"Madrid, Comunidad de",2015,15.1
+"Madrid, Comunidad de",2016,18.2
+"Madrid, Comunidad de",2017,16.9
+"Madrid, Comunidad de",2018,16.1
+"Madrid, Comunidad de",2019,15.0
+"Madrid, Comunidad de",2020,15.4
+"Madrid, Comunidad de",2021,15.2
+"Madrid, Comunidad de",2022,14.8
+"Madrid, Comunidad de",2023,12.9
+"Madrid, Comunidad de",2024,14.3
+"Madrid, Comunidad de",2025,12.7
+Melilla,2008,17.7
+Melilla,2009,30.0
+Melilla,2010,25.8
+Melilla,2011,26.5
+Melilla,2012,8.6
+Melilla,2013,21.7
+Melilla,2014,19.2
+Melilla,2015,25.8
+Melilla,2016,21.8
+Melilla,2017,26.2
+Melilla,2018,21.4
+Melilla,2019,35.7
+Melilla,2020,36.3
+Melilla,2021,30.1
+Melilla,2022,34.5
+Melilla,2023,30.8
+Melilla,2024,41.4
+Melilla,2025,39.3
+"Murcia, Región de",2008,24.5
+"Murcia, Región de",2009,29.1
+"Murcia, Región de",2010,29.8
+"Murcia, Región de",2011,25.8
+"Murcia, Región de",2012,25.2
+"Murcia, Región de",2013,26.8
+"Murcia, Región de",2014,37.2
+"Murcia, Región de",2015,31.8
+"Murcia, Región de",2016,28.9
+"Murcia, Región de",2017,30.1
+"Murcia, Región de",2018,28.6
+"Murcia, Región de",2019,27.7
+"Murcia, Región de",2020,25.0
+"Murcia, Región de",2021,27.7
+"Murcia, Región de",2022,26.3
+"Murcia, Región de",2023,24.2
+"Murcia, Región de",2024,26.0
+"Murcia, Región de",2025,26.7
+"Navarra, Comunidad Foral de",2008,5.9
+"Navarra, Comunidad Foral de",2009,7.8
+"Navarra, Comunidad Foral de",2010,10.7
+"Navarra, Comunidad Foral de",2011,8.1
+"Navarra, Comunidad Foral de",2012,7.0
+"Navarra, Comunidad Foral de",2013,9.9
+"Navarra, Comunidad Foral de",2014,11.9
+"Navarra, Comunidad Foral de",2015,9.6
+"Navarra, Comunidad Foral de",2016,9.0
+"Navarra, Comunidad Foral de",2017,8.3
+"Navarra, Comunidad Foral de",2018,8.9
+"Navarra, Comunidad Foral de",2019,7.7
+"Navarra, Comunidad Foral de",2020,9.9
+"Navarra, Comunidad Foral de",2021,9.8
+"Navarra, Comunidad Foral de",2022,10.9
+"Navarra, Comunidad Foral de",2023,13.8
+"Navarra, Comunidad Foral de",2024,14.2
+"Navarra, Comunidad Foral de",2025,12.3
+País Vasco,2008,9.1
+País Vasco,2009,10.0
+País Vasco,2010,11.7
+País Vasco,2011,13.8
+País Vasco,2012,13.3
+País Vasco,2013,10.5
+País Vasco,2014,10.2
+País Vasco,2015,10.9
+País Vasco,2016,9.0
+País Vasco,2017,9.7
+País Vasco,2018,8.6
+País Vasco,2019,10.0
+País Vasco,2020,10.0
+País Vasco,2021,12.2
+País Vasco,2022,12.2
+País Vasco,2023,10.2
+País Vasco,2024,9.4
+País Vasco,2025,9.3
+"Rioja, La",2008,16.2
+"Rioja, La",2009,17.2
+"Rioja, La",2010,21.2
+"Rioja, La",2011,20.6
+"Rioja, La",2012,16.8
+"Rioja, La",2013,19.3
+"Rioja, La",2014,16.2
+"Rioja, La",2015,17.1
+"Rioja, La",2016,11.9
+"Rioja, La",2017,9.7
+"Rioja, La",2018,16.6
+"Rioja, La",2019,12.3
+"Rioja, La",2020,15.0
+"Rioja, La",2021,16.1
+"Rioja, La",2022,16.6
+"Rioja, La",2023,16.9
+"Rioja, La",2024,19.4
+"Rioja, La",2025,18.4
+Total Nacional,2008,19.8
+Total Nacional,2009,20.4
+Total Nacional,2010,20.7
+Total Nacional,2011,20.6
+Total Nacional,2012,20.8
+Total Nacional,2013,20.4
+Total Nacional,2014,22.2
+Total Nacional,2015,22.1
+Total Nacional,2016,22.3
+Total Nacional,2017,21.6
+Total Nacional,2018,21.5
+Total Nacional,2019,20.7
+Total Nacional,2020,21.0
+Total Nacional,2021,21.7
+Total Nacional,2022,20.4
+Total Nacional,2023,20.2
+Total Nacional,2024,19.7
+Total Nacional,2025,19.5

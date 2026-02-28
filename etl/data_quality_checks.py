@@ -107,6 +107,12 @@ TABLE_CONFIG = {
         "pk": ["territory", "indicator", "year"],
         "positive_cols": ["value"],
         "year_col": "year"
+    },
+
+    "elections_parlamento_vasco": {
+        "pk": ["year", "month", "party_name"],
+        "positive_cols": ["seats"],
+        "year_col": None
     }
 }
 
@@ -196,17 +202,18 @@ def validate_table(cursor, table_name, cfg):
 
     # Year plausibility check
     year_col = cfg["year_col"]
-    current_year = datetime.now().year
-    cursor.execute(f"""
-        SELECT COUNT(*) FROM {table_name}
-        WHERE {year_col} < 1990
-           OR {year_col} > {current_year + 1}
-    """)
-    invalid_years = cursor.fetchone()[0]
-    if invalid_years > 0:
-        print(
-            f"  WARNING: Years outside reasonable range: {invalid_years}"
-        )
+    if year_col is not None:
+        current_year = datetime.now().year
+        cursor.execute(f"""
+            SELECT COUNT(*) FROM {table_name}
+            WHERE {year_col} < 1990
+               OR {year_col} > {current_year + 1}
+        """)
+        invalid_years = cursor.fetchone()[0]
+        if invalid_years > 0:
+            print(
+                f"  WARNING: Years outside reasonable range: {invalid_years}"
+            )
 
 # ======================================================
 # MAIN EXECUTION

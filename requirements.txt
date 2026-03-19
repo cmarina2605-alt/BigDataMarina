@@ -1,9 +1,13 @@
 attrs==25.4.0
+pg8000==1.31.5
+db-dtypes==1.4.2
+google-auth==2.40.0
+google-cloud-bigquery==3.34.0
+pyarrow==19.0.1
 beautifulsoup4==4.14.3
 bs4==0.0.2
 certifi==2026.2.25
 charset-normalizer==3.4.4
-dotenv==0.9.9
 h11==0.16.0
 idna==3.11
 lxml==6.0.2

@@ -8,3 +8,8 @@ analysis_results/
 .env
 *.docx
 ~$*
+
+# dbt
+target/
+dbt_packages/
+logs/

@@ -6,29 +6,29 @@
 
 ## Slide 1 — Title
 
-> Hi everyone. So, my project is about immigration and socioeconomic indicators in the Basque Country. This is Assignment 2, so it picks up from where Assignment 1 left off — I already had the data ingested into Supabase, and now the goal was to transform it and actually get some answers out of it.
+> Hi everyone. So, our project is about immigration and socioeconomic indicators in the Basque Country. This is Assignment 2, so it picks up from where Assignment 1 left off — we already had the data ingested into Supabase, and now the goal was to transform it and actually get some answers out of it.
 
 ---
 
 ## Slide 2 — Research Questions
 
-> So the whole point of the project is to answer five research questions using real public data. The first one looks at whether foreigners are over-represented in police detentions. The second one is about unemployment — are foreign workers more exposed to it? Then I look at whether immigration growth tracks housing prices, whether it tracks poverty, and finally whether election results shift as demographics change. These are all things people talk about a lot, especially in the Basque Country, but the data behind those conversations isn't usually very accessible. So I wanted to see what the numbers actually say.
+> So the whole point of the project is to answer five research questions using real public data. The first one looks at whether foreigners are over-represented in police detentions. The second one is about unemployment — are foreign workers more exposed to it? Then we look at whether immigration growth tracks housing prices, whether it tracks poverty, and finally whether election results shift as demographics change. These are all things people talk about a lot, especially in the Basque Country, but the data behind those conversations isn't usually very accessible. So we wanted to see what the numbers actually say.
 
 ---
 
 ## Slide 3 — Architecture
 
-> Here's the architecture. It's four components: Supabase as the OLTP layer — that's where the raw data lives, in PostgreSQL. Then BigQuery as the data warehouse — I chose it because it's serverless, has native dbt support, and the free tier is more than enough. Then dbt handles all the SQL transformations in three layers. And finally Plotly generates a static HTML dashboard that anyone can open in a browser, no server needed.
+> Here's the architecture. It's four components: Supabase as the OLTP layer — that's where the raw data lives, in PostgreSQL. Then BigQuery as the data warehouse — we chose it because it's serverless, has native dbt support, and the free tier is more than enough. Then dbt handles all the SQL transformations in three layers. And finally Plotly generates a static HTML dashboard that anyone can open in a browser, no server needed.
 >
 > All of these were chosen with reliability, scalability, and maintainability in mind. Everything runs on managed services with automatic backups, BigQuery auto-scales, and dbt keeps the SQL modular and well-documented. The whole thing runs on free-tier resources.
 >
-> In a real team, you'd have a data engineer handling the ingestion and infrastructure, an analytics engineer writing the dbt models, and a data analyst building the dashboard. I did all three myself, but the architecture separates those concerns cleanly.
+> In a real team, you'd have a data engineer handling the ingestion and infrastructure, an analytics engineer writing the dbt models, and a data analyst building the dashboard. We split the work between the two of us, but the architecture separates those concerns cleanly.
 
 ---
 
 ## Slide 4 — dbt Pipeline
 
-> This is the transformation layer, which is where most of the work happened. I used dbt's standard three-layer pattern. The staging layer has 15 models — each one maps to a source table and just does basic cleanup: renaming columns, casting types, filtering. The intermediate layer has 4 models that handle shared calculations — things like the foreign population percentage, which is needed for four out of five research questions. And then the marts layer has 5 models, one per research question. Those are the final, analysis-ready tables that the dashboard reads from.
+> This is the transformation layer, which is where most of the work happened. We used dbt's standard three-layer pattern. The staging layer has 15 models — each one maps to a source table and just does basic cleanup: renaming columns, casting types, filtering. The intermediate layer has 4 models that handle shared calculations — things like the foreign population percentage, which is needed for four out of five research questions. And then the marts layer has 5 models, one per research question. Those are the final, analysis-ready tables that the dashboard reads from.
 >
 > In total that's 24 SQL models across the three layers, all documented with YAML schema files and tested with dbt's built-in testing framework.
 
@@ -52,11 +52,11 @@
 
 ## Slide 7 — RQ3: Housing
 
-> For housing, the short answer is: yes, immigration growth and housing prices move together, but I can't say one causes the other. Between 2015 and 2022, both metrics rose across all three Basque provinces. Gipuzkoa has the highest prices and the highest foreign population share; Araba has the lowest of both.
+> For housing, the short answer is: yes, immigration growth and housing prices move together, but we can't say one causes the other. Between 2015 and 2022, both metrics rose across all three Basque provinces. Gipuzkoa has the highest prices and the highest foreign population share; Araba has the lowest of both.
 >
 > The origin breakdown is interesting — South American immigration dominates everywhere, which makes sense given the linguistic and historical ties with Latin America.
 >
-> But housing prices are driven by so many factors — limited supply, economic growth, interest rates, domestic migration — that it's really hard to isolate immigration's specific contribution. The correlation is there, but I'd be careful about drawing causal conclusions.
+> But housing prices are driven by so many factors — limited supply, economic growth, interest rates, domestic migration — that it's really hard to isolate immigration's specific contribution. The correlation is there, but we'd be careful about drawing causal conclusions.
 
 ---
 
@@ -72,7 +72,7 @@
 
 > And the last one — elections. This was the weakest question in terms of what the data can tell us. You can see some clear trends: PNV has been stable forever, EH Bildu emerged in 2012, PP has been declining. But most foreigners can't vote in regional elections, so any demographic effect would have to be indirect — like influencing the issues that parties campaign on, or changing the composition of neighbourhoods.
 >
-> I can describe these trends happening at the same time, but I honestly can't claim one causes the other. If I were to redo this project, I'd probably replace this question with something the data can actually answer.
+> We can describe these trends happening at the same time, but we honestly can't claim one causes the other. If we were to redo this project, we'd probably replace this question with something the data can actually answer.
 
 ---
 
@@ -84,9 +84,9 @@
 
 ---
 
-## Slide 11 — What I'd Improve
+## Slide 11 — What We'd Improve
 
-> If I had more time, five things I'd do differently. First, better data sources — especially person-level crime data instead of event counts. Second, incremental ETL instead of full-load replication. Third, more dbt tests for data quality. Fourth, actual statistical analysis — regression, not just visual correlation. And fifth, connecting the dashboard directly to BigQuery so it updates in real time instead of reading from static CSVs.
+> If we had more time, five things we'd do differently. First, better data sources — especially person-level crime data instead of event counts. Second, incremental ETL instead of full-load replication. Third, more dbt tests for data quality. Fourth, actual statistical analysis — regression, not just visual correlation. And fifth, connecting the dashboard directly to BigQuery so it updates in real time instead of reading from static CSVs.
 
 ---
 

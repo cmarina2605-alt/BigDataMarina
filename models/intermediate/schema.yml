@@ -1,0 +1,70 @@
+version: 2
+
+models:
+  - name: int_foreign_population_pct
+    description: >
+      Foreign population share by province and year.
+      Combines foreign population (EUSTAT) with total population (INE).
+      Depends on: stg_eustat_foreign_population_province + stg_ine_population_province.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+
+  - name: int_foreign_detentions_pv
+    description: >
+      Total detention events involving foreign nationals in the Basque Country
+      per year. Excludes Spanish nationality, totals, and undetermined.
+      Depends on: stg_crime_by_province_nationality_clean.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: total_foreign_detentions
+        tests: [not_null]
+
+  - name: int_population_pais_vasco_year
+    description: >
+      Total and foreign population aggregated at Basque Country level
+      (sum of three provinces) per year.
+      Depends on: int_foreign_population_pct.
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+
+  - name: int_foreign_origin_mix_pv
+    description: >
+      Breakdown of the foreign population of the Basque Country by region
+      of origin (South America, Maghreb, Eastern Europe, etc.) and year.
+      Aggregates stg_eustat_population_by_origin by summing across the three
+      provinces (Araba + Bizkaia + Gipuzkoa). One row per (year, origin),
+      with an `origin_bucket` field ('Foreign'/'España'/'Total') for quick
+      filtering. Serves as the analytical base for the origin-housing
+      correlation in the housing mart.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: origin
+        tests: [not_null]
+      - name: origin_bucket
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['España', 'Foreign', 'Total']
+      - name: population_basque
+        tests: [not_null]

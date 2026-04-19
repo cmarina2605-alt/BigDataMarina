@@ -1,0 +1,156 @@
+version: 2
+
+models:
+  # --- Q1: Foreign population vs crime -------------------------------------
+  - name: mart_immigration_crime_study_pv_rates
+    description: >
+      Research Question 1. Compares the foreign share of detention/investigation
+      events against the foreign share of the resident population in the Basque
+      Country, and exposes the resulting over-representation ratio. Per-100k
+      "event rates" are also kept for completeness, but flagged as upper bounds
+      because the source counts events (not unique people) and includes
+      non-resident foreign nationals in the numerator while the denominator is
+      registered residents only. The over-representation ratio is the
+      scale-invariant, defensible headline metric.
+      Depends on: stg_crime_total_pais_vasco + int_foreign_detentions_pv +
+      int_population_pais_vasco_year.
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: total_detention_events
+        tests: [not_null]
+      - name: foreign_detention_events
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+      - name: foreign_detention_pct
+        tests: [not_null]
+      - name: over_representation_ratio
+        tests: [not_null]
+      - name: total_event_rate_per_100k
+      - name: foreign_event_rate_per_100k
+      - name: spanish_event_rate_per_100k
+
+  # --- Q2: Foreign workers and labour vulnerability ------------------------
+  - name: mart_labour_market_nationality_pv
+    description: >
+      Research Question 2. One row per (year, nationality) at País Vasco
+      level, combining:
+        * Basque rates (activity / employment / unemployment) by nationality;
+        * Basque absolute volumes (employed / unemployed / inactive /
+          total population) plus their shares;
+        * National sector mix — share of each nationality's employment in
+          Agriculture, Industry, Construction and Services (explains why the
+          unemployment gap exists in the Basque Country);
+        * National wage benchmark (gross earnings per worker and per hour).
+      Depends on: stg_activity_rate_annual + stg_unemployment_rate_annual +
+      stg_employment_rate_annual + stg_eustat_activity_by_nationality +
+      stg_ine_employment_sector_national + stg_epa_earnings_national.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: nationality
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Spanish', 'Foreign']
+      - name: activity_rate
+      - name: employment_rate
+      - name: unemployment_rate
+      - name: employed_population
+      - name: unemployed_population
+      - name: inactive_population
+      - name: total_population
+      - name: inactive_share_pct
+      - name: unemployed_share_pct
+      - name: national_pct_agriculture
+      - name: national_pct_industry
+      - name: national_pct_construction
+      - name: national_pct_services
+      - name: national_gross_earnings_per_worker_eur
+      - name: national_gross_earnings_per_hour_eur
+
+  # --- Q3: Immigration concentration vs housing prices ---------------------
+  - name: mart_housing_foreign_share
+    description: >
+      Research Question 3. For every (province, year) in Araba / Bizkaia /
+      Gipuzkoa, joins three signals:
+        * average housing price per m²;
+        * foreign-population share;
+        * dominant foreign origin region and its share of the foreign
+          population (from stg_eustat_population_by_origin), so the correlation
+          between prices and immigration can also be read through the
+          origin-mix lens.
+      Depends on: stg_housing_prices_province + int_foreign_population_pct +
+      stg_eustat_population_by_origin.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: avg_price_per_m2
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+      - name: top_foreign_origin
+      - name: top_foreign_origin_pct
+
+  # --- Q4: Immigration growth vs poverty risk ------------------------------
+  - name: mart_immigration_poverty_pv
+    description: >
+      Research Question 4. Pairs the annual Basque poverty-risk rate with
+      the foreign-population share at Basque Country level.
+      Depends on: stg_poverty_basque_country + int_population_pais_vasco_year.
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: poverty_rate
+        tests: [not_null]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+
+  # --- Q5: Electoral shifts vs demographic change --------------------------
+  - name: mart_elections_vs_demographics_pv
+    description: >
+      Research Question 5. For every Basque Parliament election, the view
+      exposes seats and seat share per party, together with two demographic
+      lenses:
+        * the foreign-population share of the Basque Country that same year
+          (stock of residents born abroad);
+        * the inter-regional in-migration rates per 1 000 inhabitants
+          (total / Spanish / foreign) from stg_migration_basque_country —
+          capturing the flow of people moving from other Spanish regions.
+      Together the two demographic signals help distinguish whether electoral
+      shifts correlate with foreign immigration or with internal mobility.
+      Depends on: stg_elections_results + int_population_pais_vasco_year +
+      stg_migration_basque_country.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: party_name
+        tests: [not_null]
+      - name: seats
+        tests: [not_null]
+      - name: total_seats_year
+        tests: [not_null]
+      - name: seats_share_pct
+        tests: [not_null]
+      - name: foreign_population_pct
+      - name: in_migration_rate_total
+      - name: in_migration_rate_spanish
+      - name: in_migration_rate_foreign

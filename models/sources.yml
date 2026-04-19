@@ -1,0 +1,19 @@
+version: 2
+
+sources:
+  - name: bigdatamarina
+    database: juanmarina
+    schema: bigdatamarina
+    tables:
+      - name: population_total
+      - name: population_eustat_total
+      - name: population_eustat_nationality
+      - name: epa_contract_stats
+      - name: migration_birth_country
+      - name: ine_employment
+      - name: crime_detentions_total
+      - name: crime_detentions
+      - name: ine_poverty_stats
+      - name: housing_prices_annual
+      - name: elections_parlamento_vasco
+      - name: eustat_activity_nationality

@@ -13,3 +13,15 @@ analysis_results/
 target/
 dbt_packages/
 logs/
+
+# IDE and system
+.DS_Store
+.vscode/
+.claude/
+
+# Virtual environments
+.venv-dbt/
+
+# Build artifacts
+test_q5.html
+*.pptx

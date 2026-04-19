@@ -1,22 +1,28 @@
 """
 Main pipeline execution script.
 
-This script orchestrates the complete ETL pipeline, including:
+This script orchestrates the complete end-to-end pipeline, including:
 
-1. Database initialization
-2. Data download from official sources
-3. Data transformation
-4. Pre-ingestion data quality checks
-5. Data loading into PostgreSQL
-6. Post-ingestion data quality checks
+ 1. Database initialization        (Supabase / PostgreSQL)
+ 2. Data download                  (INE, EUSTAT, Interior, MIVAU, elections)
+ 3. Data transformation            (Python cleaners under etl/transform_*.py)
+ 4. Pre-ingestion data quality     (fail-fast structural checks)
+ 5. Load data into PostgreSQL      (TRUNCATE + COPY, idempotent)
+ 6. Post-ingestion data quality    (informational checks on the OLTP layer)
+ 7. Replicate to BigQuery          (raw base tables  ->  BigQuery dataset)
+ 8. dbt run on BigQuery            (build 17 stg + 3 int + 3 mart views)
+ 9. Refresh dashboard charts       (BigQuery -> matplotlib PNGs)
 
 The pipeline follows a fail-fast strategy:
 - If pre-ingestion checks fail, the pipeline stops immediately.
 - Post-ingestion checks are executed only after successful ingestion.
+- Replication, dbt run and dashboard refresh stop on failure because
+  every analytical consumer downstream depends on them.
 
 This approach ensures that structurally invalid data is never loaded
-into the database, while still allowing tolerant validation of
-official statistical data.
+into the database, that the analytical layer is rebuilt only from a
+validated OLTP snapshot, and that the dashboard always reflects the
+most recent dbt run.
 """
 
 import subprocess
@@ -171,6 +177,40 @@ if __name__ == "__main__":
         "POST-INGESTION DATA QUALITY CHECKS",
         [sys.executable, "etl/data_quality_checks.py"],
         stop_on_failure=False
+    )
+
+    # --------------------------------------------------
+    # 7. REPLICATE BASE TABLES TO BIGQUERY
+    # --------------------------------------------------
+    # Copies the 12 OLTP base tables from Supabase into the
+    # BigQuery dataset so that the analytical warehouse has
+    # a fresh snapshot before dbt runs on top of it.
+    run_step(
+        "REPLICATE TO BIGQUERY",
+        [sys.executable, "etl/replicate_to_bigquery.py"]
+    )
+
+    # --------------------------------------------------
+    # 8. RUN dbt ON BIGQUERY
+    # --------------------------------------------------
+    # Executes the dbt project against the BigQuery target,
+    # rebuilding the 17 staging, 3 intermediate and 3 mart
+    # views. schema.yml tests run immediately after to catch
+    # contract regressions.
+    run_step("DBT RUN",  ["dbt", "run",  "--profiles-dir", ".dbt"])
+    run_step("DBT TEST", ["dbt", "test", "--profiles-dir", ".dbt"],
+             stop_on_failure=False)
+
+    # --------------------------------------------------
+    # 9. REFRESH DASHBOARD CHARTS
+    # --------------------------------------------------
+    # Queries the freshly built marts in BigQuery and writes
+    # the four PNGs consumed by the report and slides. This
+    # step is the live-serving entry point for the analytical
+    # use case.
+    run_step(
+        "REFRESH DASHBOARD CHARTS",
+        [sys.executable, "dashboard/build_charts_from_marts.py"]
     )
 
     total_elapsed = round(time.time() - total_start, 2)

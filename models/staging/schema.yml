@@ -1,0 +1,234 @@
+version: 2
+
+models:
+  # --- Demography -----------------------------------------------------------
+  - name: stg_ine_population_province
+    description: >
+      Total resident population by Basque province and year (INE).
+      Filters the base table to level='province', Araba/Bizkaia/Gipuzkoa,
+      'Ambos sexos', 'Todas las edades' and the July-1 reference date, and
+      casts the figure to INT64. Acts as the denominator for all rate
+      calculations downstream.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: total_population
+        tests: [not_null]
+
+  - name: stg_eustat_foreign_population_province
+    description: >
+      Foreign (non-Spanish) resident population per Basque province and year
+      (EUSTAT). Sums every non-Spanish nationality for the 'Total' activity
+      and sex slice, and standardises province labels to Araba/Bizkaia/Gipuzkoa.
+      Base for every foreign-share metric.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+
+  - name: stg_eustat_population_by_origin
+    description: >
+      EUSTAT population breakdown by province, year and region of birth
+      (España / América del Sur / Paises del Magreb / Europa del Este / etc.).
+      Standardises province labels (Araba / Bizkaia / Gipuzkoa / País Vasco)
+      and tags every origin as 'España', 'Foreign' or 'Total' so downstream
+      views can aggregate cleanly while still keeping the fine-grained origin
+      label needed for origin-mix analysis in the housing mart.
+    columns:
+      - name: province_std
+        description: Araba / Bizkaia / Gipuzkoa / País Vasco.
+        tests: [not_null]
+      - name: origin
+        description: Original EUSTAT label for the region of birth.
+        tests: [not_null]
+      - name: origin_bucket
+        description: "'España' / 'Foreign' / 'Total'."
+        tests:
+          - accepted_values:
+              values: ['España', 'Foreign', 'Total']
+      - name: year
+        tests: [not_null]
+      - name: population
+        tests: [not_null]
+
+  - name: stg_migration_basque_country
+    description: >
+      Inter-regional in-migration rates for País Vasco (INE).  The source
+      (migration_birth_country) publishes, for every autonomous community,
+      the rate of inflows from other Spanish regions per 1 000 inhabitants.
+      This view filters to the headline Basque slice
+      (Ambos sexos, Total edades, Anual, 'Dato base') and pivots the
+      nationality column into three metrics (Ambas / Española / Extranjera)
+      so each year is a single row.  Feeds the elections mart as a second
+      demographic lens capturing internal mobility, independent of
+      foreign-origin stock.
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: in_migration_rate_total
+      - name: in_migration_rate_spanish
+      - name: in_migration_rate_foreign
+
+  # --- Crime ---------------------------------------------------------------
+  - name: stg_crime_total_pais_vasco
+    description: >
+      Yearly total of detentions at the Basque Country level, pivoted by sex
+      (Ambos sexos / Hombres / Mujeres). Filters the raw crime table to the
+      'TOTAL INFRACCIONES PENALES' crime type and 'TOTAL edad' age bracket.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: ambos_sexos
+        tests: [not_null]
+
+  - name: stg_crime_by_province_nationality_clean
+    description: >
+      Detentions in the three Basque provinces disaggregated by nationality,
+      standardised province labels and summed across age groups. Base for the
+      foreign-detention analysis.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: total_detentions
+        tests: [not_null]
+
+  # --- Labour market -------------------------------------------------------
+  - name: stg_activity_rate_annual
+    description: >
+      Annual average activity rate by province and nationality (Spanish,
+      foreign, total), derived from the EUSTAT quarterly series.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: province_std
+        tests: [not_null]
+
+  - name: stg_unemployment_rate_annual
+    description: >
+      Annual average unemployment rate by province and nationality (Spanish,
+      foreign, total), derived from the EUSTAT quarterly series. Primary
+      input for the labour-vulnerability metric.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: province_std
+        tests: [not_null]
+
+  - name: stg_employment_rate_annual
+    description: >
+      Annual average employment rate by province and nationality (Spanish,
+      foreign, total), derived from the EUSTAT quarterly series.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: province_std
+        tests: [not_null]
+
+  - name: stg_eustat_activity_by_nationality
+    description: >
+      Absolute EUSTAT counts of employed, unemployed and inactive population
+      by province, nationality and year. Complements the rate views with the
+      raw volumes used in the labour-market mart.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+
+  - name: stg_ine_employment_sector_national
+    description: >
+      National sectoral distribution of employed persons (INE, 'Ocupados') in
+      thousands, broken down by economic sector (Agricultura / Industria /
+      Construcción / Servicios / Total) and by collapsed nationality bucket
+      (Spanish / Foreign / Total / Other).  Used as the national benchmark in
+      the labour mart to explain why foreign unemployment is higher in País
+      Vasco: foreigners are disproportionately concentrated in construction
+      and services.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: sector
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Agricultura', 'Industria', 'Construcción', 'Servicios', 'Total']
+      - name: nationality_bucket
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Spanish', 'Foreign', 'Total', 'Other']
+      - name: employed_thousands
+        tests: [not_null]
+
+  - name: stg_epa_earnings_national
+    description: >
+      National EPA earnings benchmark: annual and hourly gross earnings per
+      worker (EUR).  Filters to the headline slice (Ambos sexos, Total age,
+      Total disability) and pivots both indicators into one row per year.
+      Provides macro wage context in the labour mart.
+    columns:
+      - name: year
+        tests: [not_null, unique]
+      - name: gross_earnings_per_worker_eur
+      - name: gross_earnings_per_hour_eur
+
+  # --- Housing -------------------------------------------------------------
+  - name: stg_housing_prices_province
+    description: >
+      Average annual housing price per m² in the three Basque provinces,
+      averaged across the quarterly EUSTAT / MIVAU series.  Uses LIKE-based
+      matching to catch all Araba/Álava spelling variants in the source.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: avg_price_per_m2
+        tests: [not_null]
+
+  # --- Poverty -------------------------------------------------------------
+  - name: stg_poverty_basque_country
+    description: >
+      Annual poverty-risk rate for the Basque Country (INE, base 2013).
+      Filters the INE ccaa-level table to País Vasco and to the canonical
+      'Tasa de riesgo de pobreza' indicator.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: poverty_rate
+        tests: [not_null]
+
+  # --- Elections -----------------------------------------------------------
+  - name: stg_elections_results
+    description: >
+      Seats obtained by each party in every election to the Basque
+      Parliament, aggregated from the raw HTML scrape.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: party_name
+        tests: [not_null]
+      - name: total_seats
+        tests: [not_null]

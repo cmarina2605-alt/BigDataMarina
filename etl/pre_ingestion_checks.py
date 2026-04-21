@@ -201,6 +201,17 @@ DATASETS: Dict[str, Dict] = {
         "pk": ["province_std", "year"],
         "positive_numeric_cols": ["foreign_population", "total_population"],
         "check_year_range": True
+    },
+
+    "elections_clean.csv": {
+        "required_columns": [
+            "party_name", "year", "month", "seats"
+        ],
+        "pk": ["year", "month", "party_name"],
+        "positive_numeric_cols": ["seats"],
+        # Year is stored as TEXT in this table (election year label),
+        # so range validation is not applicable.
+        "check_year_range": False
     }
 }
 

@@ -211,7 +211,7 @@ if __name__ == "__main__":
     # 8. RUN dbt ON BIGQUERY
     # --------------------------------------------------
     # Executes the dbt project against the BigQuery target,
-    # rebuilding the 17 staging, 3 intermediate and 3 mart
+    # rebuilding the 17 staging, 3 intermediate and 5 mart
     # views. schema.yml tests run immediately after to catch
     # contract regressions.
     run_step("DBT RUN",  ["dbt", "run",  "--profiles-dir", ".dbt"])

@@ -17,3 +17,5 @@ sources:
       - name: housing_prices_annual
       - name: elections_parlamento_vasco
       - name: eustat_activity_nationality
+      - name: ine_padron_foreign
+      - name: ine_ecp_foreign

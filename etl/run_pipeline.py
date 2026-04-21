@@ -10,19 +10,20 @@ This script orchestrates the complete end-to-end pipeline, including:
  5. Load data into PostgreSQL      (TRUNCATE + COPY, idempotent)
  6. Post-ingestion data quality    (informational checks on the OLTP layer)
  7. Replicate to BigQuery          (raw base tables  ->  BigQuery dataset)
- 8. dbt run on BigQuery            (build 17 stg + 3 int + 3 mart views)
- 9. Refresh dashboard charts       (BigQuery -> matplotlib PNGs)
+ 8. dbt run on BigQuery            (build 17 stg + 3 int + 5 mart views)
+ 9. Verify marts for dashboard     (smoke-test the 5 marts on BigQuery)
 
 The pipeline follows a fail-fast strategy:
 - If pre-ingestion checks fail, the pipeline stops immediately.
 - Post-ingestion checks are executed only after successful ingestion.
-- Replication, dbt run and dashboard refresh stop on failure because
+- Replication, dbt run and mart verification stop on failure because
   every analytical consumer downstream depends on them.
 
 This approach ensures that structurally invalid data is never loaded
 into the database, that the analytical layer is rebuilt only from a
-validated OLTP snapshot, and that the dashboard always reflects the
-most recent dbt run.
+validated OLTP snapshot, and that the dashboard (a Streamlit app that
+queries the marts live, see `dashboard/app.py`) always reads from a
+validated set of marts.
 """
 
 import subprocess
@@ -111,6 +112,14 @@ if __name__ == "__main__":
     run_step("DOWNLOAD POVERTY DATA",
              [sys.executable, "download/ine_pobreza_download.py"])
 
+    # INE Padrón — foreign population by province (fills EUSTAT gaps)
+    run_step("DOWNLOAD INE PADRÓN FOREIGN",
+             [sys.executable, "download/ine_padron_foreign_download.py"])
+
+    # INE ECP — foreign population by province (2021+, replaces Padrón)
+    run_step("DOWNLOAD INE ECP FOREIGN",
+             [sys.executable, "download/ine_ecp_download.py"])
+
     # --------------------------------------------------
     # 3. DATA TRANSFORMATION
     # --------------------------------------------------
@@ -147,6 +156,14 @@ if __name__ == "__main__":
     run_step("TRANSFORM POVERTY DATA",
              [sys.executable, "etl/transform_ine_pobreza.py"])
 
+    # INE Padrón foreign population
+    run_step("TRANSFORM INE PADRÓN FOREIGN",
+             [sys.executable, "etl/transform_ine_padron_foreign.py"])
+
+    # INE ECP foreign population (2021+)
+    run_step("TRANSFORM INE ECP FOREIGN",
+             [sys.executable, "etl/transform_ine_ecp.py"])
+
     # --------------------------------------------------
     # 4. PRE-INGESTION DATA QUALITY CHECKS
     # --------------------------------------------------
@@ -182,7 +199,7 @@ if __name__ == "__main__":
     # --------------------------------------------------
     # 7. REPLICATE BASE TABLES TO BIGQUERY
     # --------------------------------------------------
-    # Copies the 12 OLTP base tables from Supabase into the
+    # Copies the 14 OLTP base tables from Supabase into the
     # BigQuery dataset so that the analytical warehouse has
     # a fresh snapshot before dbt runs on top of it.
     run_step(
@@ -202,15 +219,16 @@ if __name__ == "__main__":
              stop_on_failure=False)
 
     # --------------------------------------------------
-    # 9. REFRESH DASHBOARD CHARTS
+    # 9. VERIFY MARTS FOR DASHBOARD
     # --------------------------------------------------
-    # Queries the freshly built marts in BigQuery and writes
-    # the four PNGs consumed by the report and slides. This
-    # step is the live-serving entry point for the analytical
-    # use case.
+    # Smoke-tests the 5 dbt marts on BigQuery: each one must be
+    # queryable and return >= 1 row. The Streamlit dashboard
+    # (dashboard/app.py) queries these same marts live, so this
+    # step catches any mart that is missing, empty, or unreadable
+    # before the user opens the dashboard.
     run_step(
-        "REFRESH DASHBOARD CHARTS",
-        [sys.executable, "dashboard/build_charts_from_marts.py"]
+        "VERIFY MARTS FOR DASHBOARD",
+        [sys.executable, "dashboard/verify_marts.py"]
     )
 
     total_elapsed = round(time.time() - total_start, 2)

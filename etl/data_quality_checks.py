@@ -113,6 +113,18 @@ TABLE_CONFIG = {
         "pk": ["year", "month", "party_name"],
         "positive_cols": ["seats"],
         "year_col": None
+    },
+
+    "ine_padron_foreign": {
+        "pk": ["province_std", "year"],
+        "positive_cols": ["foreign_population"],
+        "year_col": "year"
+    },
+
+    "ine_ecp_foreign": {
+        "pk": ["province_std", "year"],
+        "positive_cols": ["foreign_population", "total_population"],
+        "year_col": "year"
     }
 }
 

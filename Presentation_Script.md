@@ -18,19 +18,21 @@
 
 ## Slide 3 — Architecture
 
-> Here's the architecture. It's four components: Supabase as the OLTP layer — that's where the raw data lives, in PostgreSQL. Then BigQuery as the data warehouse — we chose it because it's serverless, has native dbt support, and the free tier is more than enough. Then dbt handles all the SQL transformations in three layers. And finally Plotly generates a static HTML dashboard that anyone can open in a browser, no server needed.
+> Here's the architecture. We have a clear OLTP-to-OLAP separation, which is a foundational pattern in data engineering. Supabase is the OLTP layer — PostgreSQL, row-oriented, optimized for transactional writes and point queries. Then BigQuery is our OLAP data warehouse — it's columnar, which means it stores data by column instead of by row. That's great for analytical queries where you need to aggregate a few columns across lots of rows. It also fits the classical definition of a data warehouse: subject-oriented around our five research questions, integrated from five different institutions, time-variant since everything is keyed by year, and non-volatile because data is loaded in bulk and not modified after.
 >
-> All of these were chosen with reliability, scalability, and maintainability in mind. Everything runs on managed services with automatic backups, BigQuery auto-scales, and dbt keeps the SQL modular and well-documented. The whole thing runs on free-tier resources.
+> Then dbt handles the transformations following an ELT pattern — that means we load the data first and then transform it inside BigQuery using SQL, instead of transforming before loading. And finally Plotly generates a static HTML dashboard.
 >
-> In a real team, you'd have a data engineer handling the ingestion and infrastructure, an analytics engineer writing the dbt models, and a data analyst building the dashboard. We split the work between the two of us, but the architecture separates those concerns cleanly.
+> All of these were chosen with reliability, scalability, and maintainability in mind. Everything runs on managed services, BigQuery auto-scales, and dbt keeps the SQL modular and documented. The whole thing runs on free-tier resources.
+>
+> In terms of roles, in a real team you'd have a data engineer handling the ingestion and infrastructure, an analytics engineer owning the dbt transformation layer, and a data analyst consuming the mart tables and building dashboards. We split the work between the two of us, but the architecture separates those concerns cleanly.
 
 ---
 
 ## Slide 4 — dbt Pipeline
 
-> This is the transformation layer, which is where most of the work happened. We used dbt's standard three-layer pattern. The staging layer has 15 models — each one maps to a source table and just does basic cleanup: renaming columns, casting types, filtering. The intermediate layer has 4 models that handle shared calculations — things like the foreign population percentage, which is needed for four out of five research questions. And then the marts layer has 5 models, one per research question. Those are the final, analysis-ready tables that the dashboard reads from.
+> This is the transformation layer, which is where most of the work happened. We followed the Bronze, Silver, Gold pattern — also called the medallion architecture. The staging layer is our Bronze: 15 models, each mapping to a source table, doing basic cleanup like renaming columns, casting types, filtering. The intermediate layer is Silver: 4 models that handle shared calculations — things like the foreign population percentage, which is needed for four out of five research questions. And then the marts layer is Gold: 5 models, one per research question. Those are the final, analysis-ready tables that the dashboard reads from.
 >
-> In total that's 24 SQL models across the three layers, all documented with YAML schema files and tested with dbt's built-in testing framework.
+> In total that's 24 SQL models across the three layers, all documented with YAML schema files and tested with dbt's built-in testing framework. We also have a three-tier data quality framework covering the six quality dimensions — completeness, consistency, accuracy, duplication, integrity, and conformity — validated at pre-ingestion, post-ingestion, and dbt test levels.
 
 ---
 

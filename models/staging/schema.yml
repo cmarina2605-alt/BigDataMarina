@@ -220,6 +220,45 @@ models:
       - name: poverty_rate
         tests: [not_null]
 
+  # --- INE Padrón / ECP foreign population --------------------------------
+  - name: stg_ine_padron_foreign_province
+    description: >
+      Foreign population by Basque province from the INE Padrón Continuo
+      (1998–2022). Provides the annual registered foreign-resident count
+      used as gap-filler where EUSTAT data is unavailable.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+
+  - name: stg_ine_ecp_foreign_province
+    description: >
+      Foreign and total population by Basque province from the INE
+      Estadística Continua de Población (2021–2025). Replaces the
+      discontinued Padrón Continuo with a broader estimation methodology.
+      Chain-linked to the Padrón scale in the dashboard for visual
+      continuity.
+    columns:
+      - name: province_std
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Araba', 'Bizkaia', 'Gipuzkoa']
+      - name: year
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population_pct
+        tests: [not_null]
+
   # --- Elections -----------------------------------------------------------
   - name: stg_elections_results
     description: >

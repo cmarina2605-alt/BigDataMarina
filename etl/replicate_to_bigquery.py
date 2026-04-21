@@ -1,7 +1,7 @@
 """
 Supabase → Google BigQuery replication script.
 
-Reads all 12 tables from Supabase (PostgreSQL) and loads them into
+Reads all 14 tables from Supabase (PostgreSQL) and loads them into
 a BigQuery dataset, replacing existing data on each run.
 
 Requirements:
@@ -172,6 +172,21 @@ SCHEMAS = {
         bigquery.SchemaField("indicator", BQ.STRING),
         bigquery.SchemaField("year",      BQ.INT64),
         bigquery.SchemaField("value",     BQ.FLOAT64),
+    ],
+    "ine_padron_foreign": [
+        bigquery.SchemaField("id",                 BQ.INT64),
+        bigquery.SchemaField("province",           BQ.STRING),
+        bigquery.SchemaField("province_std",       BQ.STRING),
+        bigquery.SchemaField("year",               BQ.INT64),
+        bigquery.SchemaField("foreign_population", BQ.INT64),
+    ],
+    "ine_ecp_foreign": [
+        bigquery.SchemaField("id",                     BQ.INT64),
+        bigquery.SchemaField("province_std",           BQ.STRING),
+        bigquery.SchemaField("year",                   BQ.INT64),
+        bigquery.SchemaField("foreign_population",     BQ.INT64),
+        bigquery.SchemaField("total_population",       BQ.INT64),
+        bigquery.SchemaField("foreign_population_pct", BQ.FLOAT64),
     ],
 }
 

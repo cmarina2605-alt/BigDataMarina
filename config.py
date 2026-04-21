@@ -1,3 +1,9 @@
+"""
+Central configuration for database credentials.
+
+Loads connection parameters from the .env file and exposes them
+as module-level constants. Also builds a SQLAlchemy-compatible URL.
+"""
 
 import os
 from dotenv import load_dotenv

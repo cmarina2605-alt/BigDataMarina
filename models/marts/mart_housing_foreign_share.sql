@@ -62,7 +62,7 @@ SELECT
     o.top_foreign_origin,
     o.top_foreign_origin_pct
 FROM housing h
-JOIN      {{ ref('int_foreign_population_pct') }} f
+LEFT JOIN {{ ref('int_foreign_population_pct') }} f
        ON f.year = h.year
       AND f.province_std = h.province_std
 LEFT JOIN top_origin o

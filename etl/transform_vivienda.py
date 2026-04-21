@@ -36,7 +36,7 @@ OUT = CLEAN_DIR / "housing_prices_annual.csv"
 # FILE DISCOVERY
 # ======================================================
 
-def encontrar_archivos():
+def find_source_files():
     """
     Locate the most recent EUSTAT CSV and MIVAU XLS files.
 
@@ -57,7 +57,7 @@ def encontrar_archivos():
 # EUSTAT PROCESSING
 # ======================================================
 
-def procesar_eustat(path):
+def process_eustat(path):
     """
     Process EUSTAT housing price CSV.
 
@@ -146,7 +146,7 @@ def procesar_eustat(path):
 # MIVAU PROCESSING
 # ======================================================
 
-def procesar_mivau(path):
+def process_mivau(path):
     """
     Process MIVAU XLS historical housing price data.
 
@@ -278,10 +278,10 @@ def main():
 
     print("Full transformation: housing prices (annual)\n")
 
-    e_path, m_path = encontrar_archivos()
+    e_path, m_path = find_source_files()
 
-    df_eustat = procesar_eustat(e_path)
-    df_mivau = procesar_mivau(m_path)
+    df_eustat = process_eustat(e_path)
+    df_mivau = process_mivau(m_path)
 
     df_final = pd.concat([df_eustat, df_mivau], ignore_index=True)
 

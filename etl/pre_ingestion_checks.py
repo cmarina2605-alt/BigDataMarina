@@ -181,6 +181,26 @@ DATASETS: Dict[str, Dict] = {
         "pk": ["territory", "indicator", "year"],
         "positive_numeric_cols": ["poverty_rate"],
         "check_year_range": True
+    },
+
+    "ine_foreign_population_province.csv": {
+        "required_columns": [
+            "province", "province_std", "year",
+            "foreign_population"
+        ],
+        "pk": ["province_std", "year"],
+        "positive_numeric_cols": ["foreign_population"],
+        "check_year_range": True
+    },
+
+    "ine_ecp_foreign_population_province.csv": {
+        "required_columns": [
+            "province_std", "year", "foreign_population",
+            "total_population", "foreign_population_pct"
+        ],
+        "pk": ["province_std", "year"],
+        "positive_numeric_cols": ["foreign_population", "total_population"],
+        "check_year_range": True
     }
 }
 

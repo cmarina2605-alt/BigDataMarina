@@ -77,7 +77,9 @@ def truncate_all():
             eustat_activity_nationality,
             elections_parlamento_vasco,
             housing_prices_annual,
-            ine_poverty_stats
+            ine_poverty_stats,
+            ine_padron_foreign,
+            ine_ecp_foreign
         RESTART IDENTITY CASCADE;
     """)
 
@@ -366,6 +368,33 @@ def load_ine_poverty():
     )
 
 
+def load_ine_padron_foreign():
+    copy_csv(
+        "ine_padron_foreign",
+        DATA_DIR / "ine_foreign_population_province.csv",
+        columns=[
+            "province",
+            "province_std",
+            "year",
+            "foreign_population"
+        ]
+    )
+
+
+def load_ine_ecp_foreign():
+    copy_csv(
+        "ine_ecp_foreign",
+        DATA_DIR / "ine_ecp_foreign_population_province.csv",
+        columns=[
+            "province_std",
+            "year",
+            "foreign_population",
+            "total_population",
+            "foreign_population_pct"
+        ]
+    )
+
+
 # ======================================================
 # MAIN EXECUTION
 # ======================================================
@@ -389,5 +418,7 @@ if __name__ == "__main__":
     load_elections()
     load_housing_prices()
     load_ine_poverty()
+    load_ine_padron_foreign()
+    load_ine_ecp_foreign()
 
     print(f"\nData loading completed in {round(time.time() - start, 2)} seconds")

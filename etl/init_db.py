@@ -330,6 +330,64 @@ CREATE TABLE IF NOT EXISTS ine_poverty_stats (
 
 COMMENT ON TABLE ine_poverty_stats IS
 'Poverty and living conditions indicators published by INE.';
+
+
+-- =====================================================
+-- INE PADRÓN — FOREIGN POPULATION BY PROVINCE
+-- =====================================================
+CREATE TABLE IF NOT EXISTS ine_padron_foreign (
+    id                  BIGSERIAL PRIMARY KEY,
+    province            TEXT NOT NULL,
+    province_std        TEXT NOT NULL,
+    year                INTEGER NOT NULL,
+    foreign_population  INTEGER NOT NULL
+);
+
+COMMENT ON TABLE ine_padron_foreign IS
+'Annual foreign population by province from the INE Padrón Continuo (1998-2022). Fills years missing from the EUSTAT nationality source.';
+
+COMMENT ON COLUMN ine_padron_foreign.province IS
+'Province name as published by INE.';
+
+COMMENT ON COLUMN ine_padron_foreign.province_std IS
+'Standardised province name for joins (Araba, Bizkaia, Gipuzkoa).';
+
+COMMENT ON COLUMN ine_padron_foreign.year IS
+'Reference year of the population count.';
+
+COMMENT ON COLUMN ine_padron_foreign.foreign_population IS
+'Number of registered foreign residents in the province.';
+
+
+-- =====================================================
+-- INE ECP — FOREIGN POPULATION BY PROVINCE (2021+)
+-- =====================================================
+CREATE TABLE IF NOT EXISTS ine_ecp_foreign (
+    id                      BIGSERIAL PRIMARY KEY,
+    province_std            TEXT NOT NULL,
+    year                    INTEGER NOT NULL,
+    foreign_population      INTEGER NOT NULL,
+    total_population        INTEGER NOT NULL,
+    foreign_population_pct  NUMERIC(6,2) NOT NULL
+);
+
+COMMENT ON TABLE ine_ecp_foreign IS
+'Annual foreign and total population by province from the INE Estadística Continua de Población (2021-2025). Replaces the discontinued Padrón Continuo with broader estimation methodology.';
+
+COMMENT ON COLUMN ine_ecp_foreign.province_std IS
+'Standardised province name (Araba, Bizkaia, Gipuzkoa).';
+
+COMMENT ON COLUMN ine_ecp_foreign.year IS
+'Reference year of the population estimate.';
+
+COMMENT ON COLUMN ine_ecp_foreign.foreign_population IS
+'Estimated number of foreign residents in the province.';
+
+COMMENT ON COLUMN ine_ecp_foreign.total_population IS
+'Estimated total population of the province.';
+
+COMMENT ON COLUMN ine_ecp_foreign.foreign_population_pct IS
+'Foreign population as a percentage of total population.';
 """
 
 

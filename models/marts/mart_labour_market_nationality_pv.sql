@@ -51,21 +51,42 @@ WITH rates AS (
     WHERE a.province_std = 'País Vasco'
 ),
 
-volumes AS (
+volumes_raw AS (
+    -- Aggregate continent-level nationalities into Foreign and Total.
+    -- The source has: Africa, America, Asia, Europe, Oceania, Total.
+    -- 'Total' includes all nationalities (Spanish + Foreign).
     SELECT
         year,
-        CASE
-            WHEN LOWER(nationality) LIKE 'spanish%' OR nationality = 'Española' THEN 'Spanish'
-            WHEN nationality = 'Total' THEN 'Total'
-            ELSE 'Foreign'
-        END AS nationality,
+        CASE WHEN nationality = 'Total' THEN 'Total' ELSE 'Foreign' END AS nationality,
         SUM(employed_population)   AS employed_population,
         SUM(unemployed_population) AS unemployed_population,
         SUM(inactive_population)   AS inactive_population,
         SUM(total_population)      AS total_population
     FROM {{ ref('stg_eustat_activity_by_nationality') }}
     WHERE province_std IN ('Araba', 'Bizkaia', 'Gipuzkoa')
-    GROUP BY year, nationality
+    GROUP BY year, CASE WHEN nationality = 'Total' THEN 'Total' ELSE 'Foreign' END
+),
+
+volumes AS (
+    -- Foreign volumes come directly from the aggregation above.
+    SELECT year, nationality, employed_population, unemployed_population,
+           inactive_population, total_population
+    FROM volumes_raw
+    WHERE nationality = 'Foreign'
+
+    UNION ALL
+
+    -- Spanish volumes = Total minus Foreign for each year.
+    SELECT
+        t.year,
+        'Spanish' AS nationality,
+        t.employed_population   - f.employed_population   AS employed_population,
+        t.unemployed_population - f.unemployed_population AS unemployed_population,
+        t.inactive_population   - f.inactive_population   AS inactive_population,
+        t.total_population      - f.total_population      AS total_population
+    FROM volumes_raw t
+    JOIN volumes_raw f ON t.year = f.year AND f.nationality = 'Foreign'
+    WHERE t.nationality = 'Total'
 ),
 
 sector_mix AS (

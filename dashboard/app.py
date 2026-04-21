@@ -491,7 +491,6 @@ with tab_q2:
     )
     labour = load_mart(MARTS["labour"]).sort_values(["year", "nationality"])
     # Cast all numeric columns to float to avoid Decimal issues
-    num_cols = labour.select_dtypes(include=["object"]).columns
     for c in labour.columns:
         if c not in ("nationality",):
             labour[c] = pd.to_numeric(labour[c], errors="coerce")
@@ -877,12 +876,17 @@ with tab_q4:
         pov_end = float(both.iloc[-1]["poverty_rate"])
         # Build accurate description of what happened
         pov_direction = "rose" if pov_end > pov_start else "fell" if pov_end < pov_start else "stayed flat"
+        crisis_note = ""
+        if pov_direction == "rose":
+            crisis_note = (
+                " — but most of that increase came from the 2008–2012 financial "
+                "crisis and the 2021 COVID aftermath, not demographic shifts"
+            )
         fp_change = (
             f" The foreign population share rose from {fp_start:.1f}% "
             f"({int(both.iloc[0]['year'])}) to {fp_end:.1f}% ({int(both.iloc[-1]['year'])}), "
-            f"while poverty {pov_direction} from {pov_start:.1f}% to {pov_end:.1f}% — "
-            f"but most of that increase came from the 2008–2012 financial crisis and the "
-            f"2021 COVID aftermath, not demographic shifts."
+            f"while poverty {pov_direction} from {pov_start:.1f}% to {pov_end:.1f}%"
+            f"{crisis_note}."
         )
 
     # Latest full-series trend (2008-2025)

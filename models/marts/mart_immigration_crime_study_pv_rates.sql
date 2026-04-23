@@ -50,6 +50,6 @@ SELECT
     ROUND(CAST((t.ambos_sexos - f.total_foreign_detentions) AS NUMERIC)
         / NULLIF((p.total_population - p.foreign_population), 0) * 100000, 2)                                       AS spanish_event_rate_per_100k
 FROM {{ ref('stg_crime_total_pais_vasco') }} t
-JOIN {{ ref('int_foreign_detentions_pv') }} f           ON t.year = f.year
+LEFT JOIN {{ ref('int_foreign_detentions_pv') }} f      ON t.year = f.year
 LEFT JOIN {{ ref('int_population_pais_vasco_year') }} p ON t.year = p.year
 ORDER BY t.year

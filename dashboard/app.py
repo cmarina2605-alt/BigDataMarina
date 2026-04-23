@@ -80,21 +80,62 @@ def load_mart(mart_name: str) -> pd.DataFrame:
     return client.query(f"SELECT * FROM {table}").to_dataframe()
 
 
-@st.cache_data(ttl=600, show_spinner="Loading demographic series...")
-def _load_demographics_bq() -> pd.DataFrame:
-    """Load the continuous foreign-population % series from the dbt
-    intermediate model int_population_pais_vasco_year (BigQuery).
+@st.cache_data(ttl=600, show_spinner="Loading INE ECP data...")
+def _load_ecp_foreign_pop_pct() -> pd.DataFrame:
+    ecp_path = BASE_DIR / "data_clean" / "ine_ecp_foreign_population_province.csv"
+    if not ecp_path.exists():
+        return pd.DataFrame(columns=["year", "foreign_pop_pct_ecp"])
+    ecp = pd.read_csv(ecp_path)
+    ecp = ecp[ecp["year"] <= 2025]
+    ecp_agg = ecp.groupby("year", as_index=False).agg(
+        foreign_population=("foreign_population", "sum"),
+        total_population=("total_population", "sum"),
+    )
+    ecp_agg["foreign_pop_pct_ecp"] = (
+        ecp_agg["foreign_population"] / ecp_agg["total_population"] * 100
+    ).round(2)
+    return ecp_agg[["year", "foreign_pop_pct_ecp"]]
 
-    This model already combines EUSTAT + INE Padrón + INE ECP sources
-    via int_foreign_population_pct, giving a continuous 1998-2025 series.
-    """
+
+@st.cache_data(ttl=600, show_spinner="Building demographic series...")
+def _load_demographics_full() -> pd.DataFrame:
+    ine = _load_ine_foreign_pop_pct()
+    ecp = _load_ecp_foreign_pop_pct()
+    if ecp.empty:
+        return ine[["year", "foreign_pop_pct_ine"]].rename(
+            columns={"foreign_pop_pct_ine": "foreign_population_pct"})
+    overlap = ine[["year", "foreign_pop_pct_ine"]].merge(
+        ecp[["year", "foreign_pop_pct_ecp"]], on="year")
+    if overlap.empty:
+        return ine[["year", "foreign_pop_pct_ine"]].rename(
+            columns={"foreign_pop_pct_ine": "foreign_population_pct"})
+    ratio = (overlap["foreign_pop_pct_ine"] / overlap["foreign_pop_pct_ecp"]).mean()
+    result = ine[["year", "foreign_pop_pct_ine"]].rename(
+        columns={"foreign_pop_pct_ine": "foreign_population_pct"}).copy()
+    padron_max_year = int(ine["year"].max())
+    ecp_ext = ecp[ecp["year"] > padron_max_year].copy()
+    if not ecp_ext.empty:
+        ecp_ext["foreign_population_pct"] = (ecp_ext["foreign_pop_pct_ecp"] * ratio).round(2)
+        result = pd.concat([result, ecp_ext[["year", "foreign_population_pct"]]], ignore_index=True)
+    return result.sort_values("year")
+
+
+@st.cache_data(ttl=600, show_spinner="Loading INE Padrón data...")
+def _load_ine_foreign_pop_pct() -> pd.DataFrame:
+    fp = pd.read_csv(BASE_DIR / "data_clean" / "ine_foreign_population_province.csv")
+    fp_agg = fp.groupby("year", as_index=False)["foreign_population"].sum()
+    # Total population from BigQuery staging view (covers more years than CSV)
     client = get_bq_client()
-    sql = f"""
-        SELECT year, total_population, foreign_population, foreign_population_pct
-        FROM `{BQ_PROJECT}.{BQ_DATASET}.int_population_pais_vasco_year`
-        ORDER BY year
+    tp_sql = f"""
+        SELECT year, SUM(total_population) AS total_population_ine
+        FROM `{BQ_PROJECT}.{BQ_DATASET}.stg_ine_population_province`
+        GROUP BY year
     """
-    return client.query(sql).to_dataframe()
+    tp_agg = client.query(tp_sql).to_dataframe()
+    merged = fp_agg.merge(tp_agg, on="year", how="inner")
+    merged["foreign_pop_pct_ine"] = (
+        merged["foreign_population"] / merged["total_population_ine"] * 100).round(2)
+    return merged[["year", "foreign_population", "total_population_ine", "foreign_pop_pct_ine"]]
 
 
 # ======================================================
@@ -666,10 +707,32 @@ with tab_q4:
         "with the national rate shown for comparison."
     )
 
-    poverty = load_mart(MARTS["poverty"]).sort_values("year")
-    for c in poverty.columns:
-        if c != "year":
-            poverty[c] = pd.to_numeric(poverty[c], errors="coerce")
+    # ── Build poverty dataset from CSV (bypasses mart for national rate) ──
+    pov_csv = pd.read_csv(BASE_DIR / "data_clean" / "ine_pobreza.csv")
+    MAIN_IND = "Todas las edades. Tasa de riesgo de pobreza (renta del año anterior a la entrevista). Base 2013."
+
+    pv_pov = (
+        pov_csv[(pov_csv["territory"] == "País Vasco") & (pov_csv["indicator"] == MAIN_IND)]
+        [["year", "poverty_rate"]].copy().sort_values("year")
+    )
+    pv_pov["poverty_rate"] = pd.to_numeric(pv_pov["poverty_rate"], errors="coerce")
+
+    nat_pov = (
+        pov_csv[(pov_csv["territory"] == "Total Nacional") & (pov_csv["indicator"] == MAIN_IND)]
+        [["year", "poverty_rate"]].copy().sort_values("year")
+    )
+    nat_pov.rename(columns={"poverty_rate": "national_poverty_rate"}, inplace=True)
+    nat_pov["national_poverty_rate"] = pd.to_numeric(nat_pov["national_poverty_rate"], errors="coerce")
+
+    poverty = pv_pov.merge(nat_pov, on="year", how="left")
+
+    demo_full = _load_demographics_full()
+    poverty = poverty.merge(
+        demo_full[["year", "foreign_population_pct"]],
+        on="year", how="left"
+    )
+    poverty = poverty.sort_values("year")
+    poverty["gap_pp"] = (poverty["national_poverty_rate"] - poverty["poverty_rate"]).round(1)
 
     # Correlation
     both = poverty.dropna(subset=["poverty_rate", "foreign_population_pct"])
@@ -688,7 +751,7 @@ with tab_q4:
               delta_color="inverse")
     if pd.notna(latest.get("national_poverty_rate")):
         k3.metric("Spain national rate", f"{float(latest['national_poverty_rate']):.1f}%",
-                  delta=f"{float(latest.get('poverty_gap_pp', 0)):.1f} pp lower in Basque C.",
+                  delta=f"{float(latest.get('gap_pp', 0)):.1f} pp lower in Basque C.",
                   delta_color="normal")
     if fp_latest is not None:
         k4.metric(f"Foreign share ({int(fp_latest['year'])})",
@@ -885,7 +948,7 @@ with tab_q5:
     grouped = grouped.sort_values("year")
 
     # Load continuous demographic series from dbt intermediate model
-    demo_full = _load_demographics_bq()
+    demo_full = _load_demographics_full()
 
     # From the mart: foreign pop at each election year (may be sparse)
     demo_elec = (

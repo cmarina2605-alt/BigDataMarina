@@ -220,18 +220,6 @@ models:
       - name: poverty_rate
         tests: [not_null]
 
-  - name: stg_poverty_national
-    description: >
-      Annual poverty-risk rate for Spain (Total Nacional, INE, base 2013).
-      Same indicator as stg_poverty_basque_country but at national level,
-      used as a benchmark to determine whether Basque poverty tracks
-      national economic cycles.
-    columns:
-      - name: year
-        tests: [not_null]
-      - name: poverty_rate
-        tests: [not_null]
-
   # --- INE Padrón / ECP foreign population --------------------------------
   - name: stg_ine_padron_foreign_province
     description: >

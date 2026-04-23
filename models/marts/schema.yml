@@ -110,19 +110,19 @@ models:
   - name: mart_immigration_poverty_pv
     description: >
       Research Question 4. Pairs the annual Basque poverty-risk rate with
-      the national rate (benchmark) and the foreign-population share.
-      Depends on: stg_poverty_basque_country + stg_poverty_national +
-      int_population_pais_vasco_year.
+      the foreign-population share at Basque Country level.
+      Depends on: stg_poverty_basque_country + int_population_pais_vasco_year.
     columns:
       - name: year
         tests: [not_null, unique]
       - name: poverty_rate
         tests: [not_null]
-      - name: national_poverty_rate
-        description: "Spain-wide poverty-risk rate (same indicator, Total Nacional)."
-      - name: poverty_gap_pp
-        description: "National rate minus Basque rate (positive = Basque is lower)."
+      - name: total_population
+        tests: [not_null]
+      - name: foreign_population
+        tests: [not_null]
       - name: foreign_population_pct
+        tests: [not_null]
 
   # --- Q5: Electoral shifts vs demographic change --------------------------
   - name: mart_elections_vs_demographics_pv

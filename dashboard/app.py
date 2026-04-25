@@ -234,39 +234,7 @@ with tab_q1:
     )
     st.plotly_chart(fig1, use_container_width=True)
 
-    # --- Chart 2: Per-100k detention rates — foreign vs Spanish ---
-    st.markdown("---")
-    st.markdown("**Detention rate per 100 000 inhabitants**")
-    st.caption(
-        "How many detention events per 100 000 people in each group. "
-        "This is the fairest comparison: it accounts for group size."
-    )
-    rate_data = crime.dropna(
-        subset=["foreign_event_rate_per_100k", "spanish_event_rate_per_100k"]
-    ).copy()
 
-    if not rate_data.empty:
-        fig_rate = go.Figure()
-        fig_rate.add_scatter(
-            x=rate_data["year"], y=rate_data["foreign_event_rate_per_100k"],
-            mode="lines+markers", name="Foreign",
-            line=dict(color="#d62728", width=2.5),
-            marker=dict(size=6),
-        )
-        fig_rate.add_scatter(
-            x=rate_data["year"], y=rate_data["spanish_event_rate_per_100k"],
-            mode="lines+markers", name="Spanish",
-            line=dict(color="#1f77b4", width=2.5),
-            marker=dict(size=6),
-        )
-        fig_rate.update_layout(
-            title="Detention events per 100 000 inhabitants",
-            xaxis=dict(title="Year"),
-            yaxis=dict(title="Events per 100k"),
-            hovermode="x unified",
-            legend=dict(orientation="h", y=-0.2),
-        )
-        st.plotly_chart(fig_rate, use_container_width=True)
 
     # --- Chart 3: Crime type breakdown (PV, latest year) ---
     st.markdown("---")
@@ -335,7 +303,13 @@ with tab_q1:
     )
     idx_data = crime.dropna(
         subset=["foreign_detention_events", "foreign_population"]
-    ).copy()
+    ).sort_values("year").copy()
+    # Remove years after a methodology break (ECP replaces Padrón →
+    # absolute foreign_population jumps >50 % in one year)
+    fp_shift = idx_data["foreign_population"].pct_change()
+    break_years = idx_data.loc[fp_shift > 0.5, "year"]
+    if not break_years.empty:
+        idx_data = idx_data[idx_data["year"] < break_years.iloc[0]]
 
     if not idx_data.empty:
         base_det = float(idx_data["foreign_detention_events"].iloc[0])
@@ -564,15 +538,38 @@ with tab_q3:
             coeffs = np.polyfit(x, y, 1)
             trend_y = np.polyval(coeffs, x)
 
+            years_arr = sub["year"].astype(int).values
+
+            # Only label first, last, and a midpoint to avoid overlap
+            mid = len(years_arr) // 2
+            labels = []
+            positions = []
+            for idx_i, yr in enumerate(years_arr):
+                if idx_i == 0:
+                    labels.append(str(yr))
+                    positions.append("bottom right")
+                elif idx_i == len(years_arr) - 1:
+                    labels.append(str(yr))
+                    positions.append("top left")
+                elif idx_i == mid:
+                    labels.append(str(yr))
+                    positions.append("middle right")
+                else:
+                    labels.append("")
+                    positions.append("top center")
+
             fig_sc = go.Figure()
             fig_sc.add_scatter(
                 x=x, y=y,
                 mode="markers+text",
                 marker=dict(size=10, color=color),
-                text=sub["year"].astype(int).astype(str).values,
-                textposition="top center",
+                text=labels,
+                textposition=positions,
                 textfont=dict(size=9),
                 showlegend=False,
+                hovertext=[f"{yr}: {fp:.1f}%, €{pr:.0f}/m²"
+                           for yr, fp, pr in zip(years_arr, x, y)],
+                hoverinfo="text",
             )
             fig_sc.add_scatter(
                 x=x, y=trend_y,
@@ -707,32 +704,38 @@ with tab_q4:
         "with the national rate shown for comparison."
     )
 
-    # ── Build poverty dataset from CSV (bypasses mart for national rate) ──
-    pov_csv = pd.read_csv(BASE_DIR / "data_clean" / "ine_pobreza.csv")
-    MAIN_IND = "Todas las edades. Tasa de riesgo de pobreza (renta del año anterior a la entrevista). Base 2013."
-
-    pv_pov = (
-        pov_csv[(pov_csv["territory"] == "País Vasco") & (pov_csv["indicator"] == MAIN_IND)]
-        [["year", "poverty_rate"]].copy().sort_values("year")
-    )
-    pv_pov["poverty_rate"] = pd.to_numeric(pv_pov["poverty_rate"], errors="coerce")
-
-    nat_pov = (
-        pov_csv[(pov_csv["territory"] == "Total Nacional") & (pov_csv["indicator"] == MAIN_IND)]
-        [["year", "poverty_rate"]].copy().sort_values("year")
-    )
-    nat_pov.rename(columns={"poverty_rate": "national_poverty_rate"}, inplace=True)
-    nat_pov["national_poverty_rate"] = pd.to_numeric(nat_pov["national_poverty_rate"], errors="coerce")
-
-    poverty = pv_pov.merge(nat_pov, on="year", how="left")
-
-    demo_full = _load_demographics_full()
-    poverty = poverty.merge(
-        demo_full[["year", "foreign_population_pct"]],
-        on="year", how="left"
-    )
-    poverty = poverty.sort_values("year")
-    poverty["gap_pp"] = (poverty["national_poverty_rate"] - poverty["poverty_rate"]).round(1)
+    # ── Load poverty data from dbt mart (with CSV fallback) ──────────
+    try:
+        poverty = load_mart(MARTS["poverty"])
+        for c in poverty.columns:
+            poverty[c] = pd.to_numeric(poverty[c], errors="coerce")
+        poverty = poverty.dropna(subset=["year"]).sort_values("year")
+        poverty["year"] = poverty["year"].astype(int)
+        poverty["gap_pp"] = poverty.get("poverty_gap_pp", pd.Series(dtype=float))
+        if poverty.empty:
+            raise ValueError("Mart returned no rows")
+    except Exception:
+        # Fallback: build from CSV if mart is unavailable
+        pov_csv = pd.read_csv(BASE_DIR / "data_clean" / "ine_pobreza.csv")
+        MAIN_IND = "Todas las edades. Tasa de riesgo de pobreza (renta del año anterior a la entrevista). Base 2013."
+        pv_pov = (
+            pov_csv[(pov_csv["territory"] == "País Vasco") & (pov_csv["indicator"] == MAIN_IND)]
+            [["year", "poverty_rate"]].copy().sort_values("year")
+        )
+        pv_pov["poverty_rate"] = pd.to_numeric(pv_pov["poverty_rate"], errors="coerce")
+        nat_pov = (
+            pov_csv[(pov_csv["territory"] == "Total Nacional") & (pov_csv["indicator"] == MAIN_IND)]
+            [["year", "poverty_rate"]].copy().sort_values("year")
+        )
+        nat_pov.rename(columns={"poverty_rate": "national_poverty_rate"}, inplace=True)
+        nat_pov["national_poverty_rate"] = pd.to_numeric(nat_pov["national_poverty_rate"], errors="coerce")
+        poverty = pv_pov.merge(nat_pov, on="year", how="left")
+        demo_full = _load_demographics_full()
+        poverty = poverty.merge(
+            demo_full[["year", "foreign_population_pct"]], on="year", how="left"
+        )
+        poverty = poverty.sort_values("year")
+        poverty["gap_pp"] = (poverty["national_poverty_rate"] - poverty["poverty_rate"]).round(1)
 
     # Correlation
     both = poverty.dropna(subset=["poverty_rate", "foreign_population_pct"])
@@ -756,7 +759,7 @@ with tab_q4:
     if fp_latest is not None:
         k4.metric(f"Foreign share ({int(fp_latest['year'])})",
                   f"{float(fp_latest['foreign_population_pct']):.1f}%",
-                  help=f"Chain-linked INE series, r = {corr:.2f}")
+                  help=f"From dbt mart, r = {corr:.2f}")
 
     # ── Chart 1: Scatter — foreign pop % vs poverty rate ────────────
     sc_data = poverty.dropna(subset=["poverty_rate", "foreign_population_pct"]).copy()

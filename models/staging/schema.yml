@@ -220,6 +220,18 @@ models:
       - name: poverty_rate
         tests: [not_null]
 
+  - name: stg_poverty_national
+    description: >
+      Annual poverty-risk rate for Spain as a whole (INE, base 2013).
+      Filters the INE ccaa-level table to 'Total Nacional' and to the
+      canonical 'Tasa de riesgo de pobreza' indicator. Used alongside
+      the Basque rate in the poverty mart to compute the gap.
+    columns:
+      - name: year
+        tests: [not_null]
+      - name: poverty_rate
+        tests: [not_null]
+
   # --- INE Padrón / ECP foreign population --------------------------------
   - name: stg_ine_padron_foreign_province
     description: >
